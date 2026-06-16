@@ -1,0 +1,8 @@
+{
+  "name": "MYP Personal Project Toolkit – AI Learning Companion",
+  "description": "An IB-aligned guided supervisor that helps students think, reflect, and structure their Personal Project through targeted questioning and gap detection.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

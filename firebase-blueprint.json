@@ -1,0 +1,81 @@
+{
+  "entities": {
+    "Project": {
+      "title": "Project",
+      "description": "The main container for a student's IB MYP Personal Project.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentEmail": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "band7Mode": { "type": "boolean" }
+      },
+      "required": ["title", "studentId", "studentEmail"]
+    },
+    "Section": {
+      "title": "Section",
+      "description": "A specific component of the Personal Project (e.g., Learning Goal, Success Criteria).",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "sectionId": { "type": "string", "description": "goal | product | criteria | planning | skills | reflection" },
+        "content": { "type": "string" },
+        "checklist": { "type": "object" },
+        "status": { "type": "string", "enum": ["missing", "needs_improvement", "strong"] },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      },
+      "required": ["projectId", "sectionId", "content", "status"]
+    },
+    "MentorPrompt": {
+      "title": "Mentor Prompt",
+      "description": "A record of questions and nudges provided by the AI mentor.",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "sectionId": { "type": "string" },
+        "questions": { "type": "array", "items": { "type": "string" } },
+        "gapDetection": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["projectId", "sectionId", "questions", "timestamp"]
+    },
+    "PastProject": {
+      "title": "Past Project",
+      "description": "An exemplary report or project from previous years.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "author": { "type": "string" },
+        "year": { "type": "string" },
+        "grade": { "type": "number" },
+        "description": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "isLocked": { "type": "boolean" },
+        "fileUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "author", "year", "grade", "description", "isLocked", "fileUrl"]
+    }
+  },
+  "firestore": {
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Main project documents."
+    },
+    "/projects/{projectId}/sections/{sectionId}": {
+      "schema": "Section",
+      "description": "Content for each section of the project."
+    },
+    "/projects/{projectId}/prompts/{promptId}": {
+      "schema": "MentorPrompt",
+      "description": "History of mentor interactions."
+    },
+    "/past_projects/{projectId}": {
+      "schema": "PastProject",
+      "description": "Repository of exemplary past project reports."
+    }
+  }
+}

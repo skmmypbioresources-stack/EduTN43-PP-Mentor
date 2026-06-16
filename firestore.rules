@@ -1,0 +1,157 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // -------------------------------------------------------------------------
+    // 0. Global Safety Net
+    // -------------------------------------------------------------------------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // -------------------------------------------------------------------------
+    // Global Helpers
+    // -------------------------------------------------------------------------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.email_verified == null || request.auth.token.email_verified == false);
+    }
+
+    function isOwner(userId) {
+      return isVerified() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      return isVerified() && request.auth.token.email in ['senthilkumar.r@gsis.ac.in', 'skmmypbioresources@gmail.com'];
+    }
+
+    // -------------------------------------------------------------------------
+    // Entities Validation
+    // -------------------------------------------------------------------------
+    
+    function isValidProject(data) {
+      return data.keys().hasAll(['title', 'studentId', 'studentEmail', 'createdAt', 'updatedAt', 'band7Mode'])
+          && data.keys().size() == 6
+          && data.title is string && data.title.size() <= 200
+          && data.studentId == request.auth.uid
+          && data.studentEmail is string
+          && data.createdAt is timestamp
+          && data.updatedAt is timestamp
+          && data.band7Mode is bool;
+    }
+
+    function isValidSection(data) {
+      return data.keys().hasAll(['projectId', 'sectionId', 'id', 'content', 'checklist', 'status', 'lastUpdated'])
+          && data.keys().size() == 7
+          && data.projectId is string && data.sectionId is string && data.id is string
+          && data.content is string && data.content.size() <= 50000
+          && data.checklist is map
+          && data.status in ['missing', 'needs_improvement', 'strong']
+          && data.lastUpdated is timestamp;
+    }
+
+    function isValidPrompt(data) {
+      return data.keys().hasAll(['projectId', 'sectionId', 'questions', 'timestamp'])
+          && data.keys().size() >= 4 && data.keys().size() <= 6
+          && data.projectId is string
+          && data.sectionId is string
+          && data.questions is list
+          && data.questions.size() <= 50
+          && data.timestamp is timestamp
+          && (!data.keys().hasAny(['mindMapNodes']) || data.questions is list)
+          && (!data.keys().hasAny(['gapDetection']) || data.gapDetection is string);
+    }
+
+    function isValidPastProject(data) {
+      return data.keys().hasAll(['title', 'author', 'year', 'grade', 'description', 'tags', 'isLocked', 'fileUrl', 'updatedAt', 'createdAt'])
+          && data.keys().size() == 10
+          && data.title is string && data.title.size() <= 300
+          && data.author is string && data.author.size() <= 100
+          && data.year is string && data.year.size() == 4
+          && data.grade is number && data.grade >= 1 && data.grade <= 8
+          && data.description is string && data.description.size() <= 2000
+          && data.tags is list && data.tags.size() <= 20
+          && data.isLocked is bool
+          && (data.fileUrl is string && data.fileUrl.size() <= 2000000)
+          && data.updatedAt is timestamp
+          && data.createdAt is timestamp;
+    }
+
+    // -------------------------------------------------------------------------
+    // Routes
+    // -------------------------------------------------------------------------
+
+    match /projects/{projectId} {
+      allow get: if isSignedIn() && (existing() == null || existing().studentId == request.auth.uid);
+      allow list: if isSignedIn() && resource.data.studentId == request.auth.uid;
+      
+      allow create: if isSignedIn() 
+                    && isValidId(projectId)
+                    && incoming().studentId == request.auth.uid
+                    && incoming().title is string
+                    && incoming().title.size() <= 200;
+
+      allow update: if isSignedIn()
+                    && existing().studentId == request.auth.uid
+                    && incoming().studentId == request.auth.uid
+                    && (
+                      incoming().diff(existing()).affectedKeys().hasOnly(['title', 'updatedAt', 'band7Mode'])
+                    );
+
+      allow delete: if isSignedIn() && existing().studentId == request.auth.uid;
+
+      // Subcollections
+      match /sections/{sectionId} {
+        allow get, list: if isSignedIn() && get(/databases/$(database)/documents/projects/$(projectId)).data.studentId == request.auth.uid;
+
+        allow create: if isSignedIn()
+                      && get(/databases/$(database)/documents/projects/$(projectId)).data.studentId == request.auth.uid
+                      && isValidId(sectionId)
+                      && isValidSection(incoming());
+
+        allow update: if isSignedIn()
+                      && get(/databases/$(database)/documents/projects/$(projectId)).data.studentId == request.auth.uid
+                      && isValidSection(incoming())
+                      && (
+                        incoming().diff(existing()).affectedKeys().hasOnly(['content', 'checklist', 'status', 'lastUpdated'])
+                      );
+      }
+
+      match /prompts/{promptId} {
+        allow get, list: if isSignedIn() && get(/databases/$(database)/documents/projects/$(projectId)).data.studentId == request.auth.uid;
+        allow create: if isSignedIn()
+                      && get(/databases/$(database)/documents/projects/$(projectId)).data.studentId == request.auth.uid
+                      && isValidId(promptId)
+                      && isValidPrompt(incoming());
+      }
+    }
+
+    match /past_projects/{projectId} {
+      allow list: if isSignedIn();
+      allow get: if isSignedIn();
+      allow create: if isAdmin() 
+                    && isValidPastProject(incoming()) 
+                    && incoming().createdAt == request.time
+                    && incoming().updatedAt == request.time;
+      allow update: if isAdmin() 
+                    && isValidPastProject(incoming()) 
+                    && incoming().createdAt == existing().createdAt
+                    && incoming().updatedAt == request.time;
+      allow delete: if isAdmin();
+    }
+  }
+}

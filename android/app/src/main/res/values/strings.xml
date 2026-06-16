@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PP Mentor</string>
+    <string name="title_activity_main">PP Mentor</string>
+    <string name="package_name">com.edutn43.ppmentor</string>
+    <string name="custom_url_scheme">com.edutn43.ppmentor</string>
+</resources>
