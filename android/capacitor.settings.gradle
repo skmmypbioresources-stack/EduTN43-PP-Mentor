@@ -2,5 +2,5 @@
 include ':capacitor-android'
 project(':capacitor-android').projectDir = new File('../node_modules/@capacitor/android/capacitor')
 
-include ':capgo-capacitor-firebase-authentication'
-project(':capgo-capacitor-firebase-authentication').projectDir = new File('../node_modules/@capgo/capacitor-firebase-authentication/android')
+include ':capacitor-firebase-authentication'
+project(':capacitor-firebase-authentication').projectDir = new File('../node_modules/@capacitor-firebase/authentication/android')

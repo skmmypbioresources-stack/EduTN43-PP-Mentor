@@ -16,7 +16,10 @@ service cloud.firestore {
     }
 
     function isVerified() {
-      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.email_verified == null || request.auth.token.email_verified == false);
+      // Google Sign-In accounts are always email-verified, so this simply
+      // requires the user to be signed in. Previously this also accepted
+      // email_verified == false / null, which made the check a no-op.
+      return isSignedIn() && request.auth.token.email_verified == true;
     }
 
     function isOwner(userId) {

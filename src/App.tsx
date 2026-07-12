@@ -11,6 +11,7 @@ import Resources from './components/Resources';
 import ProcessJournal from './components/ProcessJournal';
 import Navbar from './components/Navbar';
 import ApiKeyGate from './components/ApiKeyGate';
+import AcademicHonestyToast from './components/AcademicHonestyToast';
 import { motion, AnimatePresence } from 'motion/react';
 import { Loader2 } from 'lucide-react';
 
@@ -18,6 +19,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasApiKey, setHasApiKey] = useState(!!localStorage.getItem('user_gemini_api_key'));
+  const [showAcademicToast, setShowAcademicToast] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -26,7 +28,69 @@ export default function App() {
     });
     return () => unsubscribe();
   }, []);
+  // Prevent copy, paste, cut, right-click and keyboard shortcuts
+  useEffect(() => {
+   const preventAction = (e: Event) => {
+  const target = e.target as HTMLElement;
 
+  // Allow copy, paste, cut and right-click inside the API key input
+  if (target?.id === 'activate-key-input') {
+    return;
+  }
+
+  e.preventDefault();
+
+  setShowAcademicToast(true);
+
+  setTimeout(() => {
+    setShowAcademicToast(false);
+  }, 3000);
+};
+
+   const handleKeyDown = (e: KeyboardEvent) => {
+  const target = e.target as HTMLElement;
+
+  // Allow normal copy, paste, cut and select-all inside the API key box
+  if (target?.id === 'activate-key-input') {
+    return;
+  }
+
+  const isCmdOrCtrl = e.ctrlKey || e.metaKey;
+
+  if (isCmdOrCtrl) {
+    const key = e.key.toLowerCase();
+
+    if (
+      key === 'c' ||
+      key === 'v' ||
+      key === 'x' ||
+      key === 'a'
+    ) {
+      e.preventDefault();
+
+      setShowAcademicToast(true);
+
+      setTimeout(() => {
+        setShowAcademicToast(false);
+      }, 3000);
+    }
+  }
+};
+
+    document.addEventListener('copy', preventAction);
+    document.addEventListener('cut', preventAction);
+    document.addEventListener('paste', preventAction);
+    document.addEventListener('contextmenu', preventAction);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('copy', preventAction);
+      document.removeEventListener('cut', preventAction);
+      document.removeEventListener('paste', preventAction);
+      document.removeEventListener('contextmenu', preventAction);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
   // Sync state if localStorage changes directly
   useEffect(() => {
     const checkKey = () => setHasApiKey(!!localStorage.getItem('user_gemini_api_key'));
@@ -50,6 +114,7 @@ export default function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50 text-gray-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+        <AcademicHonestyToast show={showAcademicToast} />
         <AnimatePresence mode="wait">
           {!user ? (
             <Routes>

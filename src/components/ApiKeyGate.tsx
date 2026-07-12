@@ -130,17 +130,22 @@ export default function ApiKeyGate({ onActivate }: ApiKeyGateProps) {
             </label>
             <div className="relative">
               <input
-                id="activate-key-input"
-                type={showKey ? 'text' : 'password'}
-                value={key}
-                onChange={(e) => {
-                  setKey(e.target.value);
-                  setStatus('idle');
-                  setErrorMessage('');
-                }}
-                placeholder="AIzaSy..."
-                className="w-full pl-5 pr-12 py-4 bg-gray-50 border border-gray-150 rounded-3xl text-sm font-mono focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all shadow-sm"
-              />
+  id="activate-key-input"
+  type={showKey ? 'text' : 'password'}
+  value={key}
+  onChange={(e) => {
+    setKey(e.target.value);
+    setStatus('idle');
+    setErrorMessage('');
+  }}
+  onCopy={(e) => e.stopPropagation()}
+  onCut={(e) => e.stopPropagation()}
+  onPaste={(e) => e.stopPropagation()}
+  onContextMenu={(e) => e.stopPropagation()}
+  onKeyDown={(e) => e.stopPropagation()}
+  placeholder="AIzaSy..."
+  className="w-full pl-5 pr-12 py-4 bg-gray-50 border border-gray-150 rounded-3xl text-sm font-mono focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all shadow-sm"
+/>
               <button
                 type="button"
                 onClick={() => setShowKey(!showKey)}
