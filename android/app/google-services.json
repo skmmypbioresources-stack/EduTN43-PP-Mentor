@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "931614915911-44fspq7dtlgi9rijou28mr5nvrmdkvjs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.edutn43.ppmentor",
+            "certificate_hash": "9c6226ee856fe240641bdffc537fd6cccf4f18ba"
+          }
+        },
+        {
           "client_id": "931614915911-d8sm4eib15gkj08j11s0iqr7oprt6qrv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

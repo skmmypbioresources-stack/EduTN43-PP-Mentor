@@ -17,8 +17,8 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode >= GoogleProvider.REQUEST_AUTHORIZE_GOOGLE_MIN
-                && requestCode < GoogleProvider.REQUEST_AUTHORIZE_GOOGLE_MAX) {
+        if (requestCode >= GoogleProvider.REQUEST_AUTHORIZE_GOOGLE_MIN &&
+                requestCode < GoogleProvider.REQUEST_AUTHORIZE_GOOGLE_MAX) {
 
             PluginHandle pluginHandle = getBridge().getPlugin("SocialLogin");
 
@@ -30,7 +30,7 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
             Plugin plugin = pluginHandle.getInstance();
 
             if (!(plugin instanceof SocialLoginPlugin)) {
-                Log.i("Google Activity Result", "Plugin is not SocialLoginPlugin");
+                Log.i("Google Activity Result", "SocialLogin plugin instance is invalid");
                 return;
             }
 
@@ -40,6 +40,6 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
 
     @Override
     public void IHaveModifiedTheMainActivityForTheUseWithSocialLoginPlugin() {
-        // Leave empty
+        // Required by the Social Login plugin
     }
 }
