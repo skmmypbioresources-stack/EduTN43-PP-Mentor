@@ -13,7 +13,7 @@ import Navbar from './components/Navbar';
 import ApiKeyGate from './components/ApiKeyGate';
 import AcademicHonestyToast from './components/AcademicHonestyToast';
 import { motion, AnimatePresence } from 'motion/react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, WifiOff } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -21,6 +21,8 @@ export default function App() {
   const [hasApiKey, setHasApiKey] = useState(!!localStorage.getItem('user_gemini_api_key'));
   const [showAcademicToast, setShowAcademicToast] = useState(false);
 
+
+const [isOnline, setIsOnline] = useState(navigator.onLine);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
@@ -97,7 +99,18 @@ export default function App() {
     window.addEventListener('storage', checkKey);
     return () => window.removeEventListener('storage', checkKey);
   }, []);
+useEffect(() => {
+  const goOnline = () => setIsOnline(true);
+  const goOffline = () => setIsOnline(false);
 
+  window.addEventListener('online', goOnline);
+  window.addEventListener('offline', goOffline);
+
+  return () => {
+    window.removeEventListener('online', goOnline);
+    window.removeEventListener('offline', goOffline);
+  };
+}, []);
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -115,6 +128,25 @@ export default function App() {
     <Router>
       <div className="min-h-screen bg-gray-50 text-gray-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
         <AcademicHonestyToast show={showAcademicToast} />
+        
+        {!isOnline && (
+  <motion.div
+    initial={{ y: -60, opacity: 0 }}
+    animate={{ y: 0, opacity: 1 }}
+    exit={{ y: -60, opacity: 0 }}
+    className="bg-amber-500 text-white shadow-md"
+  >
+    <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-3">
+      <WifiOff className="w-5 h-5" />
+
+      <div className="text-sm font-medium">
+        <span className="font-bold">Offline Mode</span> •
+        Reading content is available.
+        AI and cloud features require an internet connection.
+      </div>
+    </div>
+  </motion.div>
+)}
         <AnimatePresence mode="wait">
           {!user ? (
             <Routes>

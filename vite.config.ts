@@ -15,6 +15,51 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         injectRegister: 'auto',
 
+        workbox: {
+  cleanupOutdatedCaches: true,
+  clientsClaim: true,
+  skipWaiting: true,
+
+  navigateFallback: 'index.html',
+
+  runtimeCaching: [
+    {
+      urlPattern: ({ request }) => request.destination === 'document',
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'pages-cache',
+      },
+    },
+    {
+      urlPattern: ({ request }) => request.destination === 'script',
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'js-cache',
+      },
+    },
+    {
+      urlPattern: ({ request }) => request.destination === 'style',
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'css-cache',
+      },
+    },
+    {
+      urlPattern: ({ request }) => request.destination === 'image',
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'image-cache',
+      },
+    },
+    {
+      urlPattern: ({ request }) => request.destination === 'font',
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'font-cache',
+      },
+    },
+  ],
+},
         manifest: {
           id: '/',
           name: 'PPM - Personal Project Mentor',
