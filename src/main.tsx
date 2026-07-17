@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { SocialLogin } from '@capgo/capacitor-social-login';
 
+import './pwa';          // ← NEW
 import App from './App.tsx';
 import './index.css';
 
